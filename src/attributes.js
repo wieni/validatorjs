@@ -34,7 +34,6 @@ var replacements = {
 };
 
 function _addReplacement(name, fn) {
-  console.log(typeof fn === 'function');
   if (typeof fn === 'function') {
     replacements[name] = function(template, rule) {
       var parameters = rule.getParameters();
