@@ -29,6 +29,75 @@ describe('register a custom validation rule', function() {
     expect(validator.passes()).to.be.true;
   });
 
+  it('should pass the custom greater_than rule registration with custom replacements', function() {
+    Validator.register(
+      'greater_than', 
+      function(val, req) {
+        return val > Number(req);
+      },
+      function (props) {
+        return {
+          value: props
+        }
+      },
+      'The :attribute field should be greater than :value.'
+    );
+
+    var validator = new Validator({
+      age: 22
+    }, {
+      age: 'greater_than:21'
+    });
+
+    expect(validator.passes()).to.be.true;
+    expect(validator.fails()).to.be.false;
+  });
+
+  it('should fail the custom greater_than rule registration with custom replacements', function() {
+    Validator.register(
+      'greater_than', 
+      function(val, req) {
+        return val > Number(req);
+      },
+      function (props) {
+        return {
+          value: props
+        }
+      },
+      'The :attribute field should be greater than :value.'
+    );
+
+    var validator = new Validator({
+      age: 18
+    }, {
+      age: 'greater_than:21'
+    });
+
+    expect(validator.fails()).to.be.true;
+    expect(validator.passes()).to.be.false;
+    expect(validator.errors.first('age')).to.equal('The age field should be greater than 21.');
+  }); 
+
+  it('should fail the custom greater_than rule registration without custom replacements', function() {
+    Validator.register(
+      'greater_than', 
+      function(val, req) {
+        return val > Number(req);
+      },
+      'The :attribute field is not big enough.'
+    );
+
+    var validator = new Validator({
+      age: 18
+    }, {
+      age: 'greater_than:21'
+    });
+
+    expect(validator.fails()).to.be.true;
+    expect(validator.passes()).to.be.false;
+    expect(validator.errors.first('age')).to.equal('The age field is not big enough.');
+  });
+
   it('should override custom rules', function() {
     Validator.register('string', function(val) {
       return true;

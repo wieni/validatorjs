@@ -118,12 +118,23 @@ var replacements = {
   }
 };
 
+function _addReplacement(name, fn) {
+  console.log(typeof fn === 'function');
+  if (typeof fn === 'function') {
+    replacements[name] = function(template, rule) {
+      var parameters = rule.getParameters();
+      return this._replacePlaceholders(rule, template, fn(parameters));
+    };
+  }
+}
+
 function formatter(attribute) {
   return attribute.replace(/[_\[]/g, ' ').replace(/]/g, '');
 }
 
 module.exports = {
   replacements: replacements,
+  _addReplacement: _addReplacement,
   formatter: formatter
 };
 
@@ -1433,8 +1444,15 @@ Validator.stopOnError = function(attributes) {
  * @param  {string}   message
  * @return {void}
  */
-Validator.register = function(name, fn, message) {
+Validator.register = function(name, fn, replaceFn, message) {
   var lang = Validator.getDefaultLang();
+
+  if (typeof replaceFn === 'string') {
+    message = replaceFn;
+  } else if (typeof replaceFn === 'function') {
+    Attributes._addReplacement(name, replaceFn);
+  }
+
   Rules.register(name, fn);
   Lang._setRuleMessage(lang, name, message);
 };

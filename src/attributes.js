@@ -33,11 +33,22 @@ var replacements = {
   }
 };
 
+function _addReplacement(name, fn) {
+  console.log(typeof fn === 'function');
+  if (typeof fn === 'function') {
+    replacements[name] = function(template, rule) {
+      var parameters = rule.getParameters();
+      return this._replacePlaceholders(rule, template, fn(parameters));
+    };
+  }
+}
+
 function formatter(attribute) {
   return attribute.replace(/[_\[]/g, ' ').replace(/]/g, '');
 }
 
 module.exports = {
   replacements: replacements,
+  _addReplacement: _addReplacement,
   formatter: formatter
 };
